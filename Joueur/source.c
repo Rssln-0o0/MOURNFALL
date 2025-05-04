@@ -22,37 +22,80 @@ void init_Player(Player* player, const char* idle_frames[], int x, int y) {
     player->Jumping = false;
 }
 
+void init_jump(Player* player, float startX, float startY, float endX, float peakY)
+{
+    player->JumpStartX = startX;
+    player->JumpEndX = endX;
+    player->JumpProgress = 0.0f;
+    player->Jumping = true;
+    
+    float x1 = startX;
+    float x2 = endX;
+    float x_peak = (x1 + x2) / 2.0f;
+    float y1 = startY;
+    float y2 = startY;
+    float y_peak = peakY;
+
+    player->JumpC = y1;
+    player->JumpA = (y_peak - y1) / ((x_peak - x1) * (x_peak - x1));
+    player->JumpB = -2 * player->JumpA * x_peak;
+}
+
+void update_jump(Player* player, float deltaTime)
+{
+    if (!player->Jumping)
+        return;
+    player->JumpProgress = deltaTime++;
+    if (player->JumpProgress > 1.0f)
+    {
+        player->JumpProgress = 1.0f;
+        player->Jumping = false;
+        return;
+    }
+    //nouvelle pos. x
+    float t = player->JumpProgress;
+    float x = player->JumpStartX + t * (player->JumpEndX - player->JumpStartX);
+    //nouvelle pos.y
+    float y = player->JumpA * x * x + player->JumpB * x + player->JumpC;
+    //màj
+    player->PlayerPos.x = (int)x;
+    player->PlayerPos.y = (int)y;
+}
+
 void afficher_Player(SDL_Surface* screen, Player* player) {
     SDL_BlitSurface(player->Frames[player->CurrentFrame], NULL, screen, &player->PlayerPos);
 }
 
-void deplacer_Player(Player* player, SDL_Event event) {
-    switch (event.type) {
+void deplacer_Player(Player* player, SDL_Event event)
+{
+    switch (event.type)
+    {
         case SDL_KEYDOWN:
-            switch (event.key.keysym.sym) {
+            switch (event.key.keysym.sym)
+            {
                 case SDLK_LEFT:
                     player->Speed_x = -5;
                     player->Direction = -1;
-                    player->State = 1; // Marcher
+                    player->State = 1; //marcher (dir. gauche)
                     break;
                 case SDLK_RIGHT:
                     player->Speed_x = 5;
                     player->Direction = 1;
-                    player->State = 1; // Marcher
+                    player->State = 1; //marcher (dir. droite)
                     break;
                 case SDLK_SPACE:
-                    if (!player->Jumping) {
-                        player->Speed_y = -15;
-                        player->Jumping = true;
-                        player->State = 3; // Sauter
+                    if (!player->Jumping)
+                    {
+                        init_jump(player, player->PlayerPos.x, player->PlayerPos.y, player->PlayerPos.x + 150, player->PlayerPos.y - 100);
+                        player->State = 3; //jump
                     }
                     break;
                 case SDLK_LSHIFT:
                     player->Speed_x *= 2;
-                    player->State = 2; // Courir
+                    player->State = 2; //courir
                     break;
                 case SDLK_a:
-                    player->State = 4; // Attaquer
+                    player->State = 4; //attaquer
                     break;
             }
             break;
@@ -65,69 +108,52 @@ void deplacer_Player(Player* player, SDL_Event event) {
 
     player->PlayerPos.x += player->Speed_x;
 
-    if (player->Jumping) {
-        player->Speed_y += 1; // Gravité
-        player->PlayerPos.y += player->Speed_y;
-
-        if (player->PlayerPos.y >= 300) { // Collision avec le sol fictif
-            player->PlayerPos.y = 300;
-            player->Speed_y = 0;
-            player->Jumping = false;
-            player->State = 0; // Retour à l'état idle
-        }
-    }
+    update_jump(player, deltaTime);
 }
 
-void deplacer_Player2(Player* player, SDL_Event event) {
-    switch (event.type) {
+void deplacer_Player2(Player* player, SDL_Event event)
+{
+    switch (event.type)
+    {
         case SDL_KEYDOWN:
             switch (event.key.keysym.sym) {
-                case SDLK_j: // Reculer
+                case SDLK_j:
                     player->Speed_x = -5;
                     player->Direction = -1;
-                    player->State = 1; // Marcher
+                    player->State = 1; //marcher (dir. gauche)
                     break;
-                case SDLK_l: // Avancer
+                case SDLK_l:
                     player->Speed_x = 5;
                     player->Direction = 1;
-                    player->State = 1; // Marcher
+                    player->State = 1; //marcher (dir. droite)
                     break;
-                case SDLK_i: // Sauter
-                    if (!player->Jumping) {
+                case SDLK_i:
+                    if (!player->Jumping)
+                    {
                         player->Speed_y = -15;
-                        player->Jumping = true;
-                        player->State = 3; // Sauter
+                        init_jump(player, player->PlayerPos.x, player->PlayerPos.y, player->PlayerPos.x + 150, player->PlayerPos.y - 100);
+                        player->State = 3; //jump
                     }
                     break;
-                case SDLK_k: // Courir
+                case SDLK_k:
                     player->Speed_x *= 2;
-                    player->State = 2; // Courir
+                    player->State = 2; //courir
                     break;
-                case SDLK_n: // Attaquer
-                    player->State = 4; // Attaquer
+                case SDLK_n:
+                    player->State = 4; //attaquer
                     break;
             }
             break;
 
         case SDL_KEYUP:
             player->Speed_x = 0;
-            player->State = 0; // Idle
+            player->State = 0; //idle
             break;
     }
 
     player->PlayerPos.x += player->Speed_x;
 
-    if (player->Jumping) {
-        player->Speed_y += 1; // Gravité
-        player->PlayerPos.y += player->Speed_y;
-
-        if (player->PlayerPos.y >= 300) { // Collision avec le sol fictif
-            player->PlayerPos.y = 300;
-            player->Speed_y = 0;
-            player->Jumping = false;
-            player->State = 0; // Retour à l'état idle
-        }
-    }
+    update_jump(player, deltaTime);
 }
 
 void animer_Player(Player* player) {
