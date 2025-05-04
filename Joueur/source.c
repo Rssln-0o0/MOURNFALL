@@ -45,27 +45,23 @@ void update_jump(Player* player, float deltaTime)
 {
     if (!player->Jumping)
         return;
-    player->JumpProgress = deltaTime++;
-    if (player->JumpProgress > 1.0f)
-    {
-        player->JumpProgress = 1.0f;
-        player->Jumping = false;
-        return;
-    }
-    //nouvelle pos.x
-    float t = player->JumpProgress;
-    float x = player->JumpStartX + t * (player->JumpEndX - player->JumpStartX);
-    //nouvelle pos.y
-    float y = player->JumpA * x * x + player->JumpB * x + player->JumpC;
-    //màj
-    player->PlayerPos.x = (int)x;
-    player->PlayerPos.y = (int)y;
+    //progression
+    player->JumpProgress += deltaTime;
     //retour idle
     if (player->JumpProgress >= 1.0f)
     {
-    player->Jumping = false;
-    player->State = 0;
+        player->JumpProgress = 1.0f;
+        player->Jumping = false;
+        player->State = 0;
+        return;
     }
+    //nouvelle pos.
+    float t = player->JumpProgress;
+    float x = player->JumpStartX + t * (player->JumpEndX - player->JumpStartX);
+    float y = player->JumpA * x * x + player->JumpB * x + player->JumpC;
+    //màj pos.
+    player->PlayerPos.x = (int)x;
+    player->PlayerPos.y = (int)y;
 }
 
 void afficher_Player(SDL_Surface* screen, Player* player) {
@@ -108,7 +104,7 @@ void deplacer_Player(Player* player, SDL_Event event)
 
         case SDL_KEYUP:
             player->Speed_x = 0;
-            player->State = 0; // Idle
+            player->State = 0; // idle
             break;
     }
 
