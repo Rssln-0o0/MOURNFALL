@@ -9,14 +9,13 @@
 typedef struct {
     SDL_Surface* Frames[4];
     SDL_Rect PlayerPos;
-    int CurrentFrame;
+    int CurrentFrame, LifeBar, Score;
     int State;              // 0 = idle, 1 = marcher, 2 = courir, 3 = sauter, 4 = attaquer
-    int Direction;          // Gauche = -1, Droite = 1
-    int LifeBar;          
-    int Score;              
-    int Speed_x;           
-    int Speed_y;            
-    bool Jumping;           
+    int Direction;          // Gauche = -1, Droite = 1              
+    int Speed_x, Speed_y;       
+    bool Jumping;
+    float JumpA, JumpB, JumpC;
+    float JumpStartX, JumpEndX, JumpProgress;
 } Player;
 
 typedef struct {
@@ -25,6 +24,8 @@ typedef struct {
 
 
 void init_Player(Player* player, const char* idle_frames[], int x, int y);
+void init_jump(Player* player, float startX, float startY, float endX, float peakY);
+void update_jump(Player* player, float deltaTime);
 void afficher_Player(SDL_Surface* screen, Player* player);
 void deplacer_Player(Player* player, SDL_Event event);
 void deplacer_Player2(Player* player, SDL_Event event);
