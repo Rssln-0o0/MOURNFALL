@@ -2,7 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void init_Player(Player* player, const char* idle_frames[], int x, int y) {
+void init_Player(Player* player, const char* idle_frames[], int x, int y)
+{
     for (int i = 0; i < 4; i++) {
         player->Frames[i] = IMG_Load(idle_frames[i]);
         if (!player->Frames[i]) {
@@ -64,11 +65,12 @@ void update_jump(Player* player, float deltaTime)
     player->PlayerPos.y = (int)y;
 }
 
-void afficher_Player(SDL_Surface* screen, Player* player) {
+void afficher_Player(SDL_Surface* screen, Player* player)
+{
     SDL_BlitSurface(player->Frames[player->CurrentFrame], NULL, screen, &player->PlayerPos);
 }
 
-void deplacer_Player(Player* player, SDL_Event event)
+void deplacer_Player(Player* player, SDL_Event event, float deltaTime)
 {
     switch (event.type)
     {
@@ -113,12 +115,13 @@ void deplacer_Player(Player* player, SDL_Event event)
     update_jump(player, deltaTime);
 }
 
-void deplacer_Player2(Player* player, SDL_Event event)
+void deplacer_Player2(Player* player, SDL_Event event, float deltaTime)
 {
     switch (event.type)
     {
         case SDL_KEYDOWN:
-            switch (event.key.keysym.sym) {
+            switch (event.key.keysym.sym)
+            {
                 case SDLK_j:
                     player->Speed_x = -5;
                     player->Direction = -1;
@@ -158,14 +161,16 @@ void deplacer_Player2(Player* player, SDL_Event event)
     update_jump(player, deltaTime);
 }
 
-void animer_Player(Player* player) {
+void animer_Player(Player* player)
+{
     player->CurrentFrame++;
     if (player->CurrentFrame >= 4) {
         player->CurrentFrame = 0;
     }
 }
 
-void afficher_score_vies(SDL_Surface* ecran, TTF_Font* font, Player* player) {
+void afficher_score_vies(SDL_Surface* ecran, TTF_Font* font, Player* player) //to-edit-later
+{
     SDL_Color blanc = {255, 255, 255};
     char texte[50];
     sprintf(texte, "Vies: %d | Score: %d", player->LifeBar, player->Score);
@@ -176,13 +181,15 @@ void afficher_score_vies(SDL_Surface* ecran, TTF_Font* font, Player* player) {
     SDL_FreeSurface(surfaceTexte);
 }
 
-void liberer_Player(Player* player) {
+void liberer_Player(Player* player)
+{
     for (int i = 0; i < 4; i++) {
         SDL_FreeSurface(player->Frames[i]);
     }
 }
 
-void init_Background(Background* bg, const char* chemin_image) {
+void init_Background(Background* bg, const char* chemin_image) //draft
+{
     bg->BackgroundImage = IMG_Load(chemin_image);
     if (!bg->BackgroundImage) {
         printf("Erreur chargement background : %s\n", SDL_GetError());
@@ -190,10 +197,12 @@ void init_Background(Background* bg, const char* chemin_image) {
     }
 }
 
-void afficher_Background(SDL_Surface* screen, Background* bg) {
+void afficher_Background(SDL_Surface* screen, Background* bg)
+{
     SDL_BlitSurface(bg->BackgroundImage, NULL, screen, NULL);
 }
 
-void liberer_Background(Background* bg) {
+void liberer_Background(Background* bg)
+{
     SDL_FreeSurface(bg->BackgroundImage);
 }
