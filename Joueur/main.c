@@ -69,7 +69,17 @@ int main(int argc, char* argv[]) {
     SDL_Event event;
     bool running = true;
 
+    //update jump
+    Uint32 lastTime = SDL_GetTicks();
+    Uint32 currentTime;
+    float deltaTime;
+
     while (running) {
+	//calcul delta
+        currentTime = SDL_GetTicks();
+        deltaTime = (currentTime - lastTime) / 1000.0f;
+        lastTime = currentTime;  
+
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
                 running = false;
@@ -82,9 +92,9 @@ int main(int argc, char* argv[]) {
                 }
             }
 
-            deplacer_Player(&player1, event);
+            deplacer_Player(&player1, event, deltaTime);
             if (player2_initialized) {
-                deplacer_Player2(&player2, event);
+                deplacer_Player2(&player2, event, deltaTime);
             }
         }
 
@@ -132,6 +142,11 @@ int main(int argc, char* argv[]) {
                 }
             } 
             }
+
+        update_jump(&player1, deltaTime);
+        if (player2_initialized) {
+            update_jump(&player2, deltaTime);
+        }
 	 
         animer_Player(&player1);
         if (player2_initialized) {
